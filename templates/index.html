@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-world Shape Detection</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+        }
+
+        /* Form Styling */
+        form {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        form input[type="file"] {
+            margin-bottom: 15px;
+            padding: 5px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        form button {
+            background-color: #3498db;
+            color: white;
+            font-size: 1rem;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        form button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Result Section */
+        #result {
+            margin-top: 30px;
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        #shapesList {
+            list-style: none;
+            padding: 0;
+        }
+
+        #shapesList li {
+            background: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 1rem;
+            color: #34495e;
+        }
+
+        .result-image {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            form, #result {
+                padding: 10px;
+            }
+
+            form button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-world Shape Detection</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" required>
+        <button type="submit">Detect Shapes</button>
+    </form>
+    <div id="result" style="display: none;">
+        <h2>Detected Shapes:</h2>
+        <ul id="shapesList"></ul>
+        <img id="processedImage" class="result-image" alt="Processed Image">
+    </div>
+    <script>
+        document.getElementById('uploadForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch('/detect', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                
+                // Display results
+                const shapesList = document.getElementById('shapesList');
+                shapesList.innerHTML = data.shapes.map(shape => `<li>${shape}</li>`).join('');
+                
+                const processedImage = document.getElementById('processedImage');
+                processedImage.src = data.processed_image;
+
+                document.getElementById('result').style.display = 'block';
+            } catch (error) {
+                alert('Error processing image');
+                console.error(error);
+            }
+        };
+    </script>
+</body>
+</html>
